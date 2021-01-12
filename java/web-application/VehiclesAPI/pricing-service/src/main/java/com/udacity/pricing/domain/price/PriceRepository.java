@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface PriceRepository extends JpaRepository<Price, Long> {
 
-    @Query(value = "SELECT * FROM Price p WHERE p.id = :id", nativeQuery = true)
-    Optional<Price> findPriceById(Long id);
+    @Query(value = "SELECT * FROM Price p WHERE p.vehicleId = :vehicleId", nativeQuery = true)
+    Optional<Price> findPriceById(Long vehicleId);
 }

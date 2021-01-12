@@ -12,9 +12,6 @@ import java.util.List;
 public class HomePage {
 
     //Tabs
-    @FindBy(id = "nav-files-tab")
-    private WebElement filesTab;
-
     @FindBy(id = "nav-notes-tab")
     public WebElement notesTab;
 
@@ -68,11 +65,6 @@ public class HomePage {
 
     public HomePage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
-    }
-
-    //Switch
-    public void switchToNotes() {
-        this.notesTab.click();
     }
 
     public void switchToCredentials() {

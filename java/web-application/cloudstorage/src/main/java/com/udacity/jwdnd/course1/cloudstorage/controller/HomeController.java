@@ -30,6 +30,7 @@ public class HomeController {
     private final UserService userService;
     private final FileService fileService;
     private final CredentialService credentialService;
+    private static final int BYTES_OF_128MB = 128 * 1024 * 1024;
 
     public HomeController(NoteService noteService, UserService userService, FileService fileService, CredentialService credentialService) {
         this.noteService = noteService;
@@ -103,22 +104,27 @@ public class HomeController {
         String errorMessage = null;
         if (!username.isEmpty()) {
             User user = userService.getUser(username);
-            if (file != null && !file.isEmpty()) {
-                if (!fileService.isFilenameAvailable(file.getOriginalFilename())) {
-                    return "home";
-                }
+            if (file == null || file.isEmpty()) {
+                errorMessage = "Error: Please select a file to upload.";
+            }
+            else if (!fileService.isFilenameAvailable(file.getOriginalFilename(), user.getUserid())) {
+                errorMessage = "Error: Duplicate file name.";
+            }
+            else {
                 byte[] filedata = null;
                 try {
                     filedata = file.getBytes();
                 } catch (IOException e) {
                     errorMessage = "Error: Fail to upload file.";
                 }
+                if (errorMessage == null && filedata.length > BYTES_OF_128MB) {
+                    errorMessage = "Error: Fail to upload file, file size is exceeded max limit: 128MB";
+                }
                 if (errorMessage == null && fileService.addFile(new File(null, file.getOriginalFilename(), file.getContentType(), "" + file.getSize(), user.getUserid(), filedata)) <= 0) {
                     errorMessage = "Error: Fail to add file to drive.";
                 }
-                file = null;
+                model.addAttribute("files", fileService.getAllFilesForUser(user.getUserid()));
             }
-            model.addAttribute("files", fileService.getAllFilesForUser(user.getUserid()));
         }
         if (errorMessage == null) {
             model.addAttribute("success", true);
@@ -130,12 +136,16 @@ public class HomeController {
     }
 
     @GetMapping(value = "/files/{filename}")
-    public void downloadFile(@PathVariable("filename") String fileName,
+    public void downloadFile(
+                             Authentication authentication,
+                             @PathVariable("filename") String fileName,
                              @ModelAttribute("noteForm") NoteForm noteForm,
                              @ModelAttribute("credentialForm") CredentialForm credentialForm,
                              @ModelAttribute("deleteForm") DeleteForm deleteForm,
                              HttpServletResponse response) {
-        File file = fileService.getFileByName(fileName);
+        String username = authentication.getName();
+        User user = userService.getUser(username);
+        File file = fileService.getFileByNameAndUserid(fileName, user.getUserid());
         // Content-Type
         // application/pdf
         response.setContentType(file.getContenttype());

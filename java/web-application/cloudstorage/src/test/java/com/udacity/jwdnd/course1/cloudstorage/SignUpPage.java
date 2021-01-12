@@ -21,9 +21,6 @@ public class SignUpPage {
     @FindBy(id = "submit")
     private WebElement submitButton;
 
-    @FindBy(id= "success-message")
-    private WebElement successMessage;
-
     public SignUpPage (WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
     }
@@ -46,10 +43,6 @@ public class SignUpPage {
 
     public void signup() {
         this.submitButton.click();
-    }
-
-    public String getSuccessMessage() {
-        return this.successMessage.getText();
     }
 
 }

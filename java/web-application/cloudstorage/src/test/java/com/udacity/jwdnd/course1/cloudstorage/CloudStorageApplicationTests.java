@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
-
 	@LocalServerPort
 	private int port;
 
@@ -38,17 +38,17 @@ class CloudStorageApplicationTests {
 		}
 	}
 
-	private void signUp(SignUpPage signUpPage) {
-		signUpPage.setInputFirstName("Ryan");
-		signUpPage.setInputLastName("Li");
-		signUpPage.setInputUsername("Aceflyer");
-		signUpPage.setInputPassword("1");
+	private void signUp(SignUpPage signUpPage, String firstName, String lastName,String userName, String password) {
+		signUpPage.setInputFirstName(firstName);
+		signUpPage.setInputLastName(lastName);
+		signUpPage.setInputUsername(userName);
+		signUpPage.setInputPassword(password);
 		signUpPage.signup();
 	}
 
-	private void login(LoginPage loginPage) {
-		loginPage.setInputUsername("Aceflyer");
-		loginPage.setInputPassword("1");
+	private void login(LoginPage loginPage, String userName, String password) {
+		loginPage.setInputUsername(userName);
+		loginPage.setInputPassword(password);
 		loginPage.login();
 	}
 
@@ -71,19 +71,22 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void testSignUp() {
+		WebDriverWait wait = new WebDriverWait(driver,20);
 		driver.get("http://localhost:" + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
-		signUp(signUpPage);
-		Assertions.assertTrue(signUpPage.getSuccessMessage().startsWith("You successfully signed up!"));
+		LoginPage loginPage = new LoginPage(driver);
+		signUp(signUpPage, "Ryan", "Li", "Ace1", "1");
+		wait.until(ExpectedConditions.visibilityOf(loginPage.successMessage));
+		Assertions.assertEquals(loginPage.successMessage.getText(), "You have successfully signed up");
 	}
 	@Test
 	public void testLoginLogout() {
 		driver.get("http://localhost:" + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
-		signUp(signUpPage);
+		signUp(signUpPage, "Ryan", "Li", "Ace2", "1");
 		driver.get("http://localhost:" + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
-		login(loginPage);
+		login(loginPage, "Ace2", "1");
 		Assertions.assertEquals("Home", driver.getTitle());
 		driver.get("http://localhost:" + this.port + "/logout");
 		Assertions.assertEquals("Login", driver.getTitle());
@@ -92,63 +95,63 @@ class CloudStorageApplicationTests {
 	}
 	@Test
 	public void TestNotes() {
+		WebDriverWait wait = new WebDriverWait(driver,10);
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
+
 		driver.get("http://localhost:" + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
-		signUp(signUpPage);
+		signUp(signUpPage, "Ryan", "Li", "Ace3", "1");
 		driver.get("http://localhost:" + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
-		login(loginPage);
+		login(loginPage, "Ace3", "1");
 		driver.get("http://localhost:" + this.port + "/home");
 		HomePage homePage = new HomePage(driver);
 		ResultPage resultPage = new ResultPage(driver);
-		WebElement notesTab = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.notesTab));
-		homePage.switchToNotes();
-		WebElement addNoteShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.notesTab));
+		jse.executeScript("arguments[0].click()", homePage.notesTab);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
 		//Add a note
 		homePage.addNote();
-		WebElement noteModalVisible = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.noteModal));
+		wait.until(ExpectedConditions.visibilityOf(homePage.noteModal));
 		homePage.editNoteTitle("Hi");
-		Boolean inputTitleAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteTitleElement(), "value"));
+		wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteTitleElement(), "value"));
 		homePage.editNoteDescription("Hello World!");
-		Boolean inputDescriptionAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteDescriptionElement(), "value"));
-		WebElement submit = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.submitNoteButton));
+		wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteDescriptionElement(), "value"));
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.submitNoteButton));
 		homePage.saveNoteChanges();
-		WebElement result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-		resultPage.successContinue();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		WebElement addNoteButtonAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
-		homePage.switchToNotes();
-		addNoteShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
+		wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+		jse.executeScript("arguments[0].click()", resultPage.successContinue);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.notesTab));
+		jse.executeScript("arguments[0].click()", homePage.notesTab);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
 		Assertions.assertEquals("Hi", homePage.getFirstNoteTitle());
 		Assertions.assertEquals("Hello World!", homePage.getFirstNoteDescription());
 
 		//Edit a note
 		homePage.editFirstNote();
-		noteModalVisible = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.noteModal));
+		wait.until(ExpectedConditions.visibilityOf(homePage.noteModal));
 		homePage.editNoteTitle("Hey");
-		inputTitleAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteTitleElement(), "value"));
+		wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteTitleElement(), "value"));
 		homePage.editNoteDescription("How are you doing?");
-		inputDescriptionAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteDescriptionElement(), "value"));
-		submit = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.submitNoteButton));
+		wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.getInputNoteDescriptionElement(), "value"));
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.submitNoteButton));
 		homePage.saveNoteChanges();
-		result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-		resultPage.successContinue();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		addNoteButtonAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
-		homePage.switchToNotes();
-		addNoteShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
+		wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+		jse.executeScript("arguments[0].click()", resultPage.successContinue);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.notesTab));
+		jse.executeScript("arguments[0].click()", homePage.notesTab);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
 		Assertions.assertEquals("Hey", homePage.getFirstNoteTitle());
 		Assertions.assertEquals("How are you doing?", homePage.getFirstNoteDescription());
 
 		//Delete a note
 		homePage.deleteFirstNote();
-		WebElement deleteModal = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.deleteModal));
+		wait.until(ExpectedConditions.visibilityOf(homePage.deleteModal));
 		homePage.confirmDelete();
-		result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-		resultPage.successContinue();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		addNoteButtonAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addNoteButton));
-		homePage.switchToNotes();
+		wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+		jse.executeScript("arguments[0].click()", resultPage.successContinue);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.notesTab));
+		jse.executeScript("arguments[0].click()", homePage.notesTab);
 		Assertions.assertEquals(0, homePage.getNumberOfNotes());
 	}
 
@@ -157,37 +160,41 @@ class CloudStorageApplicationTests {
 		String[] urls = new String[]{"test1.com", "test2.com", "test3.com", "test4.com", "test5.com", "test6.com"};
 		String[] usernames = new String[]{"Ryan1", "Ryan2", "Ryan3", "Ryan4", "Ryan5", "Ryan6"};
 		String[] passwords = new String[]{"1", "2", "3", "4", "5", "6"};
+		WebDriverWait wait = new WebDriverWait(driver,10);
+		JavascriptExecutor jse = (JavascriptExecutor) driver;
 
 		driver.get("http://localhost:" + this.port + "/signup");
 		SignUpPage signUpPage = new SignUpPage(driver);
-		signUp(signUpPage);
+		signUp(signUpPage, "Ryan", "Li", "Ace4", "1");
 		driver.get("http://localhost:" + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
-		login(loginPage);
+		login(loginPage, "Ace4", "1");
 		driver.get("http://localhost:" + this.port + "/home");
 		HomePage homePage = new HomePage(driver);
 		ResultPage resultPage = new ResultPage(driver);
-		WebElement credentialsTab = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.credentialsTab));
-		homePage.switchToCredentials();
-		WebElement addCredentialsShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.credentialsTab));
+		//homePage.switchToCredentials();
+		jse.executeScript("arguments[0].click()", homePage.credentialsTab);
+		wait.until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
 
 		//Add a set of credentials
 		for (int i = 0;i < urls.length;i++) {
 			homePage.addCredential();
-			WebElement credentialModalVisible = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.credentialModal));
+			wait.until(ExpectedConditions.visibilityOf(homePage.credentialModal));
 			homePage.editCredentialUrl(urls[i]);
-			Boolean inputUrlAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentialUrl, "value"));
+			wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentialUrl, "value"));
 			homePage.editCredentialUsername(usernames[i]);
-			Boolean inputUsernameAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentailUsername, "value"));
+			wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentailUsername, "value"));
 			homePage.editCredentialPassword(passwords[i]);
-			Boolean inputPasswordAvailable = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentailPassword, "value"));
-			WebElement submit = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
+			wait.until(ExpectedConditions.attributeToBeNotEmpty(homePage.inputCredentailPassword, "value"));
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
 			homePage.saveCredentialChanges();
-			WebElement result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-			resultPage.successContinue();
-			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-			homePage.switchToCredentials();
-			WebElement addCredentialShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
+			wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+			jse.executeScript("arguments[0].click()", resultPage.successContinue);
+			//driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.credentialsTab));
+			jse.executeScript("arguments[0].click()", homePage.credentialsTab);
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
 		}
 		List<String> displayUrls = homePage.getCredentialUrls();
 		List<String> displayUsernames = homePage.getCredentialUsernames();
@@ -203,16 +210,18 @@ class CloudStorageApplicationTests {
 		for (int index : idx) {
 			String password = homePage.getCredentialPasswords().get(index);
 			homePage.editIthCredential(index);
-			WebElement credentialModalVisible = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.credentialModal));
+			wait.until(ExpectedConditions.visibilityOf(homePage.credentialModal));
 			Assertions.assertEquals(passwords[index], homePage.getInputCredentialPassword());
 			homePage.editCredentialPassword(passwords[index] + passwords[index]);
-			Boolean inputCredential = new WebDriverWait(driver,10).until(ExpectedConditions.attributeToBe(homePage.inputCredentailPassword, "value", passwords[index] + passwords[index]));
+			wait.until(ExpectedConditions.attributeToBe(homePage.inputCredentailPassword, "value", passwords[index] + passwords[index]));
 			homePage.saveCredentialChanges();
-			WebElement result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-			resultPage.successContinue();
-			driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-			homePage.switchToCredentials();
-			WebElement addCredentialShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
+			wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+			jse.executeScript("arguments[0].click()", resultPage.successContinue);
+			//driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.credentialsTab));
+			jse.executeScript("arguments[0].click()", homePage.credentialsTab);
+			//homePage.switchToCredentials();
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
 			Assertions.assertNotEquals(password, homePage.getCredentialPasswords().get(index));
 		}
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -221,13 +230,13 @@ class CloudStorageApplicationTests {
 		Iterator<WebElement> iterator = homePage.getCredentialElements().iterator();
 		for (String url : toDelete) {
 			homePage.deleteCredentialWithUrl(url);
-			WebElement deleteModal = new WebDriverWait(driver,10).until(ExpectedConditions.visibilityOf(homePage.deleteModal));
+			wait.until(ExpectedConditions.visibilityOf(homePage.deleteModal));
 			homePage.confirmDelete();
-			WebElement result = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
-			resultPage.successContinue();
-			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-			homePage.switchToCredentials();
-			WebElement addCredentialShowUp = new WebDriverWait(driver,10).until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
+			wait.until(ExpectedConditions.elementToBeClickable(resultPage.successContinue));
+			jse.executeScript("arguments[0].click()", resultPage.successContinue);
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.credentialsTab));
+			jse.executeScript("arguments[0].click()", homePage.credentialsTab);
+			wait.until(ExpectedConditions.elementToBeClickable(homePage.addCredentialButton));
 		}
 		displayUrls = homePage.getCredentialUrls();
 		Assertions.assertTrue(!displayUrls.contains("test1.com"));
