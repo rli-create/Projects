@@ -15,6 +15,9 @@ public class LoginPage {
     @FindBy(id = "submitButton")
     private WebElement submitButton;
 
+    @FindBy(id = "success-message")
+    public WebElement successMessage;
+
     public LoginPage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
     }

@@ -35,8 +35,8 @@ public class PriceClient {
             Price price = client
                     .get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("services/prices/")
-                            .queryParam("vehicleId", vehicleId)
+                            .path("services/prices")
+                            .replaceQueryParam("vehicleId", vehicleId)
                             .build()
                     )
                     .retrieve().bodyToMono(Price.class).block();
@@ -47,5 +47,20 @@ public class PriceClient {
             log.error("Unexpected error retrieving price for vehicle {}", vehicleId, e);
         }
         return "(consult price)";
+    }
+
+    public void addPrice(Long vehicleId) {
+        try {
+            Price price = client
+                    .post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("services/prices/")
+                            .queryParam("vehicleId", vehicleId)
+                            .build()
+                    )
+                    .retrieve().bodyToMono(Price.class).block();
+        } catch (Exception e) {
+            log.error("Unexpected error retrieving price for vehicle {}", vehicleId, e);
+        }
     }
 }

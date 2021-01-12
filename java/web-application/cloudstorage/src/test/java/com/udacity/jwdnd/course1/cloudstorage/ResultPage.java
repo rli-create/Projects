@@ -15,12 +15,4 @@ public class ResultPage {
     public ResultPage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
     }
-
-    public void successContinue() {
-        this.successContinue.click();
-    }
-
-    public void failContinue() {
-        this.failContinue.click();
-    }
 }

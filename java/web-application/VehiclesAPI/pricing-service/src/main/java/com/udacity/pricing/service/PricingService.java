@@ -37,9 +37,10 @@ public class PricingService {
      * @return price of the requested vehicle
      * @throws PriceException vehicleID was not found
      */
-    public Price getPrice(Long vehicleId) throws PriceException {
+    public Price getPrice(Long vehicleId) {
 
-        Price price = priceRepository.findPriceById(vehicleId).orElseThrow(() -> new PriceException("Cannot find price for Vehicle " + vehicleId));
+        Price price = priceRepository.findPriceById(vehicleId).orElse(new Price(vehicleId, "USD", randomPrice()));
+
 
         return price;
     }
@@ -48,10 +49,10 @@ public class PricingService {
      * Gets a random price to fill in for a given vehicle ID.
      * @return random price for a vehicle
      */
-    /*
+
     private static BigDecimal randomPrice() {
         return new BigDecimal(ThreadLocalRandom.current().nextDouble(1, 5))
                 .multiply(new BigDecimal(5000d)).setScale(2, RoundingMode.HALF_UP);
-    }*/
+    }
 
 }

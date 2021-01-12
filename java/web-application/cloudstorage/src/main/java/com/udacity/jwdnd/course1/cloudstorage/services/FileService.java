@@ -18,12 +18,12 @@ public class FileService {
         return this.fileMapper.getUserFiles(userid);
     }
 
-    public File getFileByName(String filename) {
-        return this.fileMapper.getFileByName(filename);
+    public File getFileByNameAndUserid(String filename, Integer userid) {
+        return this.fileMapper.getFileByNameAndUserid(filename, userid);
     }
 
-    public boolean isFilenameAvailable(String filename) {
-        return getFileByName(filename) == null;
+    public boolean isFilenameAvailable(String filename, Integer userid) {
+        return getFileByNameAndUserid(filename, userid) == null;
     }
 
     public Integer addFile(File file) {
