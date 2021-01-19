@@ -1,4 +1,39 @@
 -------------------------------------------------------------------------------
 Test set: com.example.demo.EcommerceApplicationTest
 -------------------------------------------------------------------------------
-Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.537 sec
+Tests run: 13, Failures: 0, Errors: 7, Skipped: 0, Time elapsed: 6.211 sec <<< FAILURE!
+TestAddToCartUserNotFound(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.023 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.CartController.addTocart(CartController.java:48)
+	at com.example.demo.EcommerceApplicationTest.TestAddToCartUserNotFound(EcommerceApplicationTest.java:160)
+
+TestGetUserByUsername(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.002 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.UserController.findByUserName(UserController.java:63)
+	at com.example.demo.EcommerceApplicationTest.TestGetUserByUsername(EcommerceApplicationTest.java:104)
+
+TestAddToCartItemNotFound(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.004 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.CartController.addTocart(CartController.java:59)
+	at com.example.demo.EcommerceApplicationTest.TestAddToCartItemNotFound(EcommerceApplicationTest.java:175)
+
+TestCreateUser(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.003 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.UserController.createUser(UserController.java:94)
+	at com.example.demo.EcommerceApplicationTest.TestCreateUser(EcommerceApplicationTest.java:76)
+
+TestGetUserByUsernameNotFound(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.002 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.UserController.findByUserName(UserController.java:53)
+	at com.example.demo.EcommerceApplicationTest.TestGetUserByUsernameNotFound(EcommerceApplicationTest.java:118)
+
+TestAddToCart(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.002 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.CartController.addTocart(CartController.java:72)
+	at com.example.demo.EcommerceApplicationTest.TestAddToCart(EcommerceApplicationTest.java:137)
+
+TestRemoveFromCart(com.example.demo.EcommerceApplicationTest)  Time elapsed: 0.002 sec  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "com.splunk.TcpInput.submit(String)" because "this.splunkLogger" is null
+	at com.example.demo.controllers.CartController.removeFromcart(CartController.java:110)
+	at com.example.demo.EcommerceApplicationTest.TestRemoveFromCart(EcommerceApplicationTest.java:196)
+
