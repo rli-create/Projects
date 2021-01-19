@@ -15,5 +15,6 @@ com/example/demo/model/persistence/User.class
 com/example/demo/model/persistence/repositories/ItemRepository.class
 com/example/demo/security/WebSecurityConfiguration.class
 com/example/demo/controllers/CartController.class
+com/example/demo/EcommerceApplication.class
 com/example/demo/model/persistence/repositories/OrderRepository.class
 com/example/demo/controllers/ItemController.class

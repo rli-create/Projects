@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.splunk.TcpInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,16 @@ import com.example.demo.model.persistence.repositories.CartRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.CreateUserRequest;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+	@Autowired
+	TcpInput splunkLogger;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -42,11 +48,23 @@ public class UserController {
 	public ResponseEntity<User> findByUserName(@PathVariable String username) {
 		User user = userRepository.findByUsername(username);
 		if (user == null) {
-			logger.error(String.format("User with name: {0} not found", username));
+			logger.error(String.format("User with name: %s not found", username));
+			try {
+				splunkLogger.submit(String.format("Error:User with name: %s not found", username));
+			}
+			catch (IOException e) {
+				logger.warn("Failed to send log to splunk");
+			}
 			return ResponseEntity.notFound().build();
 		}
 		else {
-			logger.info(String.format("Successfully found user: {0}", username));
+			logger.info(String.format("Successfully found user: %s", username));
+			try {
+				splunkLogger.submit(String.format("Info:User with name: %s not found", username));
+			}
+			catch (IOException e) {
+				logger.warn("Failed to send log to splunk");
+			}
 			return ResponseEntity.ok(user);
 		}
 	}
@@ -61,13 +79,23 @@ public class UserController {
 		if (createUserRequest.getPassword().length() < 7 ||
 				!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
 			logger.error("User password length must be longer or equal to 7 and password and confirmPassword must be consistent");
+			try {
+				splunkLogger.submit("ERROR:created user failed, password length must be longer or equal to 7 and password and confirmPassword must be consistent");
+			}
+			catch (IOException e) {
+				logger.warn("Failed to send log to splunk");
+			}
 			return ResponseEntity.badRequest().build();
 		}
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
-		logger.info(String.format("Successfully created user: {0} with id {1}", user.getUsername(), user.getId()));
-
+		logger.info(String.format("Successfully created user: %s with id %s", user.getUsername(), user.getId()));
+		try {
+			splunkLogger.submit(String.format("INFO:Successfully created user: %s with id %s", user.getUsername(), user.getId()));
+		}
+		catch (IOException e) {
+			logger.warn("Failed to send log to splunk");
+		}
 		return ResponseEntity.ok(user);
 	}
-	
 }
