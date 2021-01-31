@@ -3,7 +3,7 @@ import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.subdag_operator import SubDagOperator
-from airflow.operators import (CreateTablesOperator, StageToRedshiftOperator, LoadFactOperator, DataQualityOperator)
+from airflow.operators import (StageToRedshiftOperator, LoadFactOperator, DataQualityOperator)
 from helpers import SqlQueries
 from subdag import load_dimensions_subdag
 
@@ -14,19 +14,19 @@ start_date = datetime(2018, 11, 2)
 end_date = datetime(2018, 11, 4)
 
 default_args = {
-    'owner': 'udacity',
-    'depends_on_past': True,
+    'owner': 'Ryan',
+    'depends_on_past': False,
     'start_date': start_date,
     'end_date': end_date,
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
-    'catchup': True
+    'catchup': False
 }
 
 dag = DAG('sparkify_dag',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
-          schedule_interval='@daily',
+          schedule_interval='@hourly',
           max_active_runs=1
         )
 
@@ -44,11 +44,11 @@ dimensions_subdag_task = SubDagOperator(
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-create_tables = CreateTablesOperator(
-    task_id='Create_tables',
-    dag=dag,
-    redshift_conn_id="redshift"
-)
+#create_tables = CreateTablesOperator(
+#    task_id='Create_tables',
+#    dag=dag,
+#    redshift_conn_id="redshift"
+#)
 
 staging_events_to_redshift = StageToRedshiftOperator(
     task_id='Stage_events',
@@ -88,16 +88,17 @@ run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
     dag=dag,
     redshift_conn_id="redshift",
-    tables=["songplays", "songs", "artists", "users", "time"]
+    nonempty_tables_to_check=["songplays", "songs", "artists", "users", "time"],
+    sql_stats_check=[(SqlQueries.count_of_nulls_in_songs_table, 0),
+                     (SqlQueries.count_of_nulls_in_artists_table, 0),
+                     (SqlQueries.count_of_nulls_in_users_table, 0),
+                     (SqlQueries.count_of_nulls_in_songplays_table,0)]
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
-start_operator >> create_tables
-create_tables >> staging_events_to_redshift
-create_tables >> staging_songs_to_redshift
-staging_events_to_redshift >> load_songplays_table
-staging_songs_to_redshift >> load_songplays_table
+start_operator >> [staging_events_to_redshift, staging_songs_to_redshift]
+[staging_events_to_redshift, staging_songs_to_redshift] >> load_songplays_table
 load_songplays_table >> dimensions_subdag_task
 dimensions_subdag_task >> run_quality_checks
 run_quality_checks >> end_operator
