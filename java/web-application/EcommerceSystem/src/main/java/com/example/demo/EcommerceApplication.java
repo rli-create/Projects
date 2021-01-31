@@ -22,7 +22,7 @@ public class EcommerceApplication {
 		ServiceArgs loginArgs = new ServiceArgs();
 		loginArgs.setUsername("Admin");
 		loginArgs.setPassword("SPLUNK-i-082b29658edb54a2f");
-		loginArgs.setHost("34.209.26.45");
+		loginArgs.setHost("54.202.111.36");
 		loginArgs.setPort(8089);
 		// Create a Service instance and log in with the argument map
 		Service service = Service.connect(loginArgs);
