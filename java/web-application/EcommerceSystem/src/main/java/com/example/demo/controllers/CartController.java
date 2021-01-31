@@ -27,8 +27,8 @@ import com.example.demo.model.requests.ModifyCartRequest;
 @RequestMapping("/api/cart")
 public class CartController {
 	private static final Logger logger = LoggerFactory.getLogger(CartController.class);
-	@Autowired
-	TcpInput splunkLogger;
+	//@Autowired
+	//TcpInput splunkLogger;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -44,23 +44,23 @@ public class CartController {
 		User user = userRepository.findByUsername(request.getUsername());
 		if(user == null) {
 			logger.error(String.format("Error:when adding item to cart: user %s not found", request.getUsername()));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Error:when adding item to cart: user %s not found", request.getUsername()));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
 		if(!item.isPresent()) {
 			logger.error(String.format("Error when adding item to cart: item %s not found", request.getItemId()));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Error when adding item to cart: item %s not found", request.getItemId()));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
@@ -68,12 +68,12 @@ public class CartController {
 			.forEach(i -> cart.addItem(item.get()));
 		cartRepository.save(cart);
 		logger.info(String.format("Successfully add item: %s to user: %s cart", request.getItemId(), user.getUsername()));
-		try {
+		/*try {
 			splunkLogger.submit(String.format("Successfully add item: %s to user: %s cart", request.getItemId(), user.getUsername()));
 		}
 		catch (IOException e) {
 			logger.warn("Failed to send log to splunk");
-		}
+		}*/
 		return ResponseEntity.ok(cart);
 	}
 	
@@ -82,23 +82,23 @@ public class CartController {
 		User user = userRepository.findByUsername(request.getUsername());
 		if(user == null) {
 			logger.error(String.format("Error when removing item from cart: user %s not found", user.getUsername()));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Error when removing item from cart: user %s not found", user.getUsername()));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
 		if(!item.isPresent()) {
 			logger.error(String.format("Error when removing item from cart: item %s not found", item.get().getId()));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Error when removing item from cart: item %s not found", item.get().getId()));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();
@@ -106,12 +106,12 @@ public class CartController {
 			.forEach(i -> cart.removeItem(item.get()));
 		cartRepository.save(cart);
 		logger.info(String.format("Successfully removed item:%s from user:%s cart", item.get().getId(), request.getUsername()));
-		try {
+		/*try {
 			splunkLogger.submit(String.format("Successfully removed item:%s from user:%s cart", item.get().getId(), request.getUsername()));
 		}
 		catch (IOException e) {
 			logger.warn("Failed to send log to splunk");
-		}
+		}*/
 		return ResponseEntity.ok(cart);
 	}
 		

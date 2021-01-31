@@ -27,8 +27,8 @@ public class UserController {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@Autowired
-	TcpInput splunkLogger;
+	//@Autowired
+	//TcpInput splunkLogger;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -49,22 +49,22 @@ public class UserController {
 		User user = userRepository.findByUsername(username);
 		if (user == null) {
 			logger.error(String.format("User with name: %s not found", username));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Error:User with name: %s not found", username));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.notFound().build();
 		}
 		else {
 			logger.info(String.format("Successfully found user: %s", username));
-			try {
+			/*try {
 				splunkLogger.submit(String.format("Info:User with name: %s not found", username));
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.ok(user);
 		}
 	}
@@ -79,23 +79,23 @@ public class UserController {
 		if (createUserRequest.getPassword().length() < 7 ||
 				!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())) {
 			logger.error("User password length must be longer or equal to 7 and password and confirmPassword must be consistent");
-			try {
+			/*try {
 				splunkLogger.submit("ERROR:created user failed, password length must be longer or equal to 7 and password and confirmPassword must be consistent");
 			}
 			catch (IOException e) {
 				logger.warn("Failed to send log to splunk");
-			}
+			}*/
 			return ResponseEntity.badRequest().build();
 		}
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
 		logger.info(String.format("Successfully created user: %s with id %s", user.getUsername(), user.getId()));
-		try {
+		/*try {
 			splunkLogger.submit(String.format("INFO:Successfully created user: %s with id %s", user.getUsername(), user.getId()));
 		}
 		catch (IOException e) {
 			logger.warn("Failed to send log to splunk");
-		}
+		}*/
 		return ResponseEntity.ok(user);
 	}
 }
