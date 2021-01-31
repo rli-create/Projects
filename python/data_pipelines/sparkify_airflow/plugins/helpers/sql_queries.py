@@ -167,6 +167,22 @@ class SqlQueries:
         DROP TABLE IF EXISTS public.songs;
     """)
     
+    count_of_nulls_in_songs_table = ("""
+        SELECT COUNT(*) FROM songs WHERE songid is NULL
+    """)
+    
+    count_of_nulls_in_artists_table = ("""
+        SELECT COUNT(*) FROM artists WHERE artistid is NULL
+    """)
+    
+    count_of_nulls_in_users_table = ("""
+        SELECT COUNT(*) FROM users WHERE userid is NULL
+    """)
+    
+    count_of_nulls_in_songplays_table = ("""
+        SELECT COUNT(*) FROM songplays WHERE playid is NULL OR start_time is NULL
+    """)
+    
     create_table_queries = [staging_events_table_create, staging_songs_table_create, songplays_table_create, artists_table_create, songs_table_create, users_table_create, time_table_create]
     
     drop_table_queries = [drop_staging_events_table, drop_staging_songs_table, drop_songplays_table, drop_users_table, drop_artists_table, drop_time_table, drop_songs_table]
