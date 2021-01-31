@@ -21,7 +21,6 @@ import com.udacity.vehicles.service.CarService;
 import java.net.URI;
 import java.util.Collections;
 
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
