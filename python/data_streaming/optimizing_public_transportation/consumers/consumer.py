@@ -37,7 +37,9 @@ class KafkaConsumer:
         #
         self.broker_properties = {
             "bootstrap.servers": "PLAINTEXT://localhost:9092",
-            "schema.registry.url": "http://localhost:8081"
+            "schema.registry.url": "http://localhost:8081",
+            "auto.offset.reset": "earliest" if offset_earliest else "latest"
+
         }
 
         # TODO: Create the Consumer, using the appropriate type.
@@ -70,10 +72,7 @@ class KafkaConsumer:
         # TODO: If the topic is configured to use `offset_earliest` set the partition offset to
         # the beginning or earliest
         for partition in partitions:
-            if self.offset_earliest:
-                partition.offset = OFFSET_BEGINNING
-            else:
-                partition.offset = OFFSET_END
+            partition.offset = OFFSET_BEGINNING
 
         logger.info("partitions assigned for %s", self.topic_name_pattern)
         consumer.assign(partitions)
